@@ -1,0 +1,25 @@
+.table {
+    margin-left: 319px;
+    width: 100%;
+    border-collapse: collapse;
+}
+.table, th, td {
+    border: 1px solid black;
+}
+.th, td {
+    padding: 8px;
+    text-align: left;
+}
+.container{
+    margin-left: 300px;
+}
+.btn{
+margin-top: 8px;
+}
+
+.pag{
+    margin-top: -33px;
+    margin-left: 392px;
+    border-radius: 4px;
+    border-color: azure;
+}
