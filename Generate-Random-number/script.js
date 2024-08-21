@@ -47,10 +47,10 @@ const userSchema = new mongoose.Schema({
         match: /^\d{10}$/, // Exactly 10 digits
     },
 });
-// // Create indexes
-// userSchema.index({ username: 1 });
-// userSchema.index({ email: 1 });
-// userSchema.index({ phone: 1 });
+// Create indexes
+userSchema.index({ username: 1 });
+userSchema.index({ email: 1 });
+userSchema.index({ phone: 1 });
  const User = mongoose.model('User', userSchema);
 
 // Helper functions
@@ -80,25 +80,25 @@ const generateUniqueEmail = () => {
 
 
 
-// async function createIndexes() {
-//     try {
-//         console.log('Checking existing indexes...');
-//         // Only create indexes if they don't exist
-//         const existingIndexes = await User.collection.indexes();
-//         const indexNames = existingIndexes.map(index => index.name);
+async function createIndexes() {
+    try {
+        console.log('Checking existing indexes...');
+        // Only create indexes if they don't exist
+        const existingIndexes = await User.collection.indexes();
+        const indexNames = existingIndexes.map(index => index.name);
         
-//         if (!indexNames.includes('email_1')) {
-//             console.log('Creating email index...');
-//             await User.createIndex({ email: 1 }, { unique: true });
-//             console.log('Index created successfully');
-//         } else {
-//             console.log('Index already exists');
-//         }
-//     } catch (error) {
-//         console.error('Error creating indexes:', error);
-//         throw error;
-//     }
-// }
+        if (!indexNames.includes('email_1')) {
+            console.log('Creating email index...');
+            await User.createIndex({ email: 1 }, { unique: true });
+            console.log('Index created successfully');
+        } else {
+            console.log('Index already exists');
+        }
+    } catch (error) {
+        console.error('Error creating indexes:', error);
+        throw error;
+    }
+}
 
 
 
