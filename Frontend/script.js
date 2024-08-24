@@ -1,3 +1,6 @@
+let searchTerm = '';
+
+
 console.log('script is loaded');
 
 //currentPage: Tracks the current page number for pagination (starts at 1).
@@ -15,7 +18,8 @@ async function fetchUsers(page = 1) {
             throw new Error('Network response was not ok');
         }
 
-        const users = await response.json();
+       // Destructure the response to get both users and totalPages
+       const { users, totalPages } = await response.json();
         console.log('Fetched users:', users);
 
         allUsers = users; // Store fetched users globally
@@ -53,7 +57,7 @@ function filterUsers() {
     const filteredUsers = allUsers.filter(user => {
         return user.username.toLowerCase().includes(searchInput) ||
             user.email.toLowerCase().includes(searchInput) ||
-            user.phone.includes(searchInput); // Phone doesn't need .toLowerCase() as it's numeric
+            user.phone.includes(searchInput); 
     });
 
     displayUsers(filteredUsers);
@@ -65,7 +69,7 @@ function updatePagination() {
     pagination.innerHTML = '';
 
     // Assume you know the total number of pages; adjust as necessary
-    const totalPages = 10; // Example value, replace with actual total pages if available
+    const totalPages = 5; // Example value, replace with actual total pages if available
 
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
