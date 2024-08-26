@@ -110,7 +110,7 @@ async function populateDatabase(req, res) {
         console.time('populateDatabase');
         await createIndexes();
 
-        const batchSize = 10;  // Define batch size for performance
+        const batchSize = 5;  // Define batch size for performance
         const totalRecords = 100; // Total records to be inserted
         let recordsInserted = 0;
 
@@ -175,6 +175,7 @@ async function populateDatabase(req, res) {
 export const getUsers = async (req, res) => {
     try {
         // Get the page from the query parameters
+        //Since query parameters are always passed as strings (e.g., '3') converts it to 3
         let page = Number(req.query.page) || 1;
         console.log('Query parameters:', req.query);
 
@@ -182,6 +183,7 @@ export const getUsers = async (req, res) => {
         const limit = 20; // show 20 users per page
         
         // Calculate how many documents to skip based on the current page
+        // first page 1-1*20 = 0 ,second page 2-1*20 =20
         const skip = (page - 1) * limit;
         
         // Log the request details
@@ -212,92 +214,70 @@ export const getUsers = async (req, res) => {
     }
 };
 
-// Backend controller function to get users with pagination
-// const getUsers = async (req, res) => {
-//     try {
-//         // Extract query parameters, default to page 1 and limit 10
-//         const { page = 1, limit = 10 } = req.query;
-        
-//         // Convert limit to a number
-//         const numericLimit = Number(limit);
-
-//         // Calculate the number of documents to skip
-//         const skip = (page - 1) * numericLimit;
-
-//         // Fetch users from the database with pagination
-//         const users = await User.find()
-//             .skip(skip)  // Skip the first 'skip' documents
-//             .limit(numericLimit);  // Limit the result to 'limit' documents
-
-//         // Count the total number of users in the database
-//         const totalUsers = await User.countDocuments();
-
-//         // Calculate total pages
-//         const totalPages = Math.ceil(totalUsers / numericLimit);
-
-//         // Respond with the list of users and pagination details
-//         res.json({ users, totalPages });
-//     } catch (error) {
-//         // Handle errors
-//         console.error(error);
-//         res.status(500).json({ error: 'Server error' });
-//     }
-// };
 
 
 
 
-// Backend controller function to search users with pagination
+
+// Backend controller function to search users with pagination and specific query parameters
 const searchUser = async (req, res) => {
     try {
         // Extract query parameters with default values
-        const { page = 1, limit = 20, search = '' } = req.query;
-
+        const { page = 1, limit = 20, name = '', email = '', phone = '' } = req.query;
+              console.log('limit' , limit)
         // Convert limit to a number
+        //The limit value is converted to a number, as query parameters are strings by default.
         const numericLimit = Number(limit);
-
-        // Create a case-insensitive regex pattern for the search term
-        const regex = new RegExp(`.*${search}.*`, 'i');
+         console.log('numericLimit' , numericLimit)
+        // Create regex patterns for each search parameter
+        const nameRegex = new RegExp(`.*${name}.*`, 'i');
+        const emailRegex = new RegExp(`.*${email}.*`, 'i');
+        const phoneRegex = new RegExp(`.*${phone}.*`, 'i');
 
         // Calculate the number of documents to skip
         const skip = (page - 1) * numericLimit;
 
-        // Perform the search query
-        const users = await User.find({
-            $or: [
-                { username: { $regex: regex } },
-                { email: { $regex: regex } },
-                { phone: { $regex: regex } }
-            ]
-        })
-        .skip(skip)  // Skip the first 'skip' documents
-        .limit(numericLimit)  // Limit the result to 'limit' documents
-        .exec();  // Execute the query
+        // Build a dynamic search query based on the provided parameters
+        const searchQuery = {};
 
+        if (name) {
+            searchQuery.username = { $regex: nameRegex };
+        }
+
+        if (email) {
+            searchQuery.email = { $regex: emailRegex };
+        }
+
+        if (phone) {
+            searchQuery.phone = { $regex: phoneRegex };
+        }
+
+        // Perform the search query with pagination
+        const users = await User.find(searchQuery)
+            .skip(skip)  // Skip the first 'skip' documents
+            .limit(numericLimit)  // Limit the result to 'limit' documents
+            .exec();  // Execute the query
+
+            console.log('Search query:', searchQuery);
         console.log('Users found:', users);
 
         // Count the total number of documents matching the search query
-        const count = await User.countDocuments({
-            $or: [
-                { username: { $regex: regex } },
-                { email: { $regex: regex } },
-                { phone: { $regex: regex } }
-            ]
-        });
-
+        const count = await User.countDocuments(searchQuery);
+         console.log('count' , count)
         // Calculate total pages
-        /*count: Total number of users, which is 100
-        numericLimit: Number of users per page, which is 10.*/
+        /*Total Users (count):100
+             Users Per Page (numericLimit): 20    100 / 20 = 5*/
         const totalPages = Math.ceil(count / numericLimit);
-
+        console.log('totalPages', totalPages)
         // Respond with the list of users, total pages, and current page
         res.json({ users, totalPages, currentPage: Number(page) });
-    } catch (error) {
+    } catch (error) {      
         // Handle errors
         console.error(error);
         res.status(500).json({ error: 'Server error' });
     }
 };
+
 
 
 

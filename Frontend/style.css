@@ -43,3 +43,11 @@ margin-top: 8px;
     border-radius: var(--bs-border-radius);
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
+
+
+
+#searchButton {
+    height: 35px;
+    margin-top: -37px;
+    margin-left: 162px;
+}

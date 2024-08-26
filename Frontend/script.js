@@ -1,14 +1,8 @@
-let searchTerm = '';
-
-
 console.log('script is loaded');
-
 //currentPage: Tracks the current page number for pagination (starts at 1).
 let currentPage = 1;
-const limit = 100; // limit: The number of users to be fetched per page (100 users)
-let allUsers = []; // allUsers: An array that will store all the fetched users.
-
-// Function to fetch users
+const limit = 20; // Number of users per page
+let allUsers = []; // Stores all fetched user
 async function fetchUsers(page = 1) {
     console.log('fetchUsers');
     try {
@@ -17,20 +11,41 @@ async function fetchUsers(page = 1) {
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
+        const data = await response.json();
+        console.log('Fetched data:', data);
 
-       // Destructure the response to get both users and totalPages
-       const { users, totalPages } = await response.json();
-        console.log('Fetched users:', users);
+        // Extract total pages from response headers or response body
+        const totalPages = parseInt(response.headers.get('total-pages')) || 5; // Adjust if your API uses a different header or structure
+console.log('totalPages', totalPages)
+        if (Array.isArray(data)) {
+            console.log('Fetched users:', data);
 
-        allUsers = users; // Store fetched users globally
-        displayUsers(users); // Display users in the table
+            allUsers = data; // Store fetched users globally
+            displayUsers(data); // Display users in the table
 
-        currentPage = page; // Update the current page after data is fetched
-        updatePagination(); // Update pagination buttons
+            currentPage = page; // Update the current page after data is fetched
+            updatePagination(totalPages); // Update pagination logic with total pages
+        } else {
+            console.error('Data is not an array:', data);
+        }
     } catch (error) {
-        console.log('user not found');
+        console.error('User not found:', error);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Function to display users in the table
 function displayUsers(users) {
@@ -49,7 +64,11 @@ function displayUsers(users) {
     });
 }
 
-// Function to filter users based on search input
+
+
+
+
+// // Function to filter users based on search input
 function filterUsers() {
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
 //filter: Iterates over each user in the allUsers array.
@@ -63,14 +82,16 @@ function filterUsers() {
     displayUsers(filteredUsers);
 }
 
+
+
+
+
 // Function to update pagination
-function updatePagination() {
+function updatePagination(totalPages) {
+    
     const pagination = document.getElementById('pagination');
     pagination.innerHTML = '';
-
-    // Assume you know the total number of pages; adjust as necessary
-    const totalPages = 5; // Example value, replace with actual total pages if available
-
+    
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
         button.textContent = i;
@@ -79,6 +100,9 @@ function updatePagination() {
         pagination.appendChild(button);
     }
 }
+
+
+
 
 // Function to generate data
 async function generateData() {
@@ -98,6 +122,9 @@ async function generateData() {
         console.log('Error generating data:', error);
     }
 }
+
+
+
 
 // Function to delete all users in batches
 async function deleteAllUsers() {
@@ -125,3 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('DeleteButton').addEventListener('click', deleteAllUsers);
     document.getElementById('searchInput').addEventListener('input', filterUsers); // Add search input listener
 });
+
+
+
+
+
+
+
+
